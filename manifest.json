@@ -1,19 +1,14 @@
 {
-  "name": "GAS Mobile IDE",
-  "short_name": "GAS IDE",
-  "start_url": ".",
+  "name": "GAS IDE",
+  "short_name": "GAS",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f0f2f5",
+  "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968517.png",
+      "src": "https://www.gstatic.com/images/branding/product/2x/apps_script_48dp.png",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968517.png",
-      "sizes": "512x512",
       "type": "image/png"
     }
   ]
