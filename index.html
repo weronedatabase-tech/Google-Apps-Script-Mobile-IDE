@@ -59,14 +59,13 @@
 </head>
 <body>
 
-  <!-- SETUP SCREEN -->
+  <!-- LOGIN SCREEN -->
   <div id="setup-screen">
     <div class="setup-box">
-      <h2>Connect Backend</h2>
-      <p style="color:var(--text-sec); font-size:0.9rem; margin-bottom:20px;">Enter your Google Apps Script Web App URL and the Password you set in Code.gs</p>
-      <input id="api-url" class="input-field" placeholder="https://script.google.com/macros/s/..." value="">
-      <input id="api-pass" class="input-field" type="password" placeholder="API Secret Password">
-      <button class="btn btn-primary btn-full" onclick="saveConfig()">Connect</button>
+      <h2>Mobile GAS IDE</h2>
+      <p style="color:var(--text-sec); font-size:0.9rem; margin-bottom:20px;">Enter API Password to access.</p>
+      <input id="api-pass" class="input-field" type="password" placeholder="Password">
+      <button class="btn btn-primary btn-full" onclick="saveConfig()">Login</button>
     </div>
   </div>
 
@@ -107,21 +106,22 @@
   <script>
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
     
-    let CONFIG = { url: localStorage.getItem('gas_url'), pass: localStorage.getItem('gas_pass') };
+    // --- CONFIG ---
+    const HARDCODED_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
+    let CONFIG = { url: HARDCODED_URL, pass: localStorage.getItem('gas_pass') };
     let state = { theme: localStorage.getItem('theme')||'light', projects:[], currentScriptId:null, currentContainerId:null, files:[], activeFileIndex:0, newFileType:'SERVER_JS', isDirty:false, deployMode: null, selectedDeployId: null };
 
     // --- SETUP & AUTH ---
     function saveConfig() {
-      const u = document.getElementById('api-url').value.trim();
       const p = document.getElementById('api-pass').value.trim();
-      if(!u || !p) return alert("Please fill all fields");
-      localStorage.setItem('gas_url', u);
+      if(!p) return alert("Please enter password");
       localStorage.setItem('gas_pass', p);
-      CONFIG = { url: u, pass: p };
+      CONFIG.pass = p;
       location.reload();
     }
     
-    if(CONFIG.url && CONFIG.pass) {
+    // Check if we have a password saved
+    if(CONFIG.pass) {
       document.getElementById('setup-screen').style.display = 'none';
       document.getElementById('app-content').style.display = 'block';
       initTheme();
@@ -133,7 +133,6 @@
       try {
         const res = await fetch(CONFIG.url, {
           method: 'POST',
-          // Use text/plain to avoid CORS pre-flight triggers (Google handles this better)
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ password: CONFIG.pass, action: action, args: args })
         });
