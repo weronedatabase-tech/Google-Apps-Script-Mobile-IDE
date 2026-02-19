@@ -1,47 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>GAS IDE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GAS Mobile IDE</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* VARIABLES */
-    :root { --bg: #f0f2f5; --surface: #ffffff; --text: #1f2937; --text-sec: #6b7280; --primary: #2563eb; --primary-fg: #ffffff; --border: #e5e7eb; --danger: #ef4444; --success: #10b981; --code-bg: #ffffff; --code-text: #1f2937; --header-h: 60px; }
-    [data-theme="dark"] { --bg: #111827; --surface: #1f2937; --text: #f9fafb; --text-sec: #9ca3af; --primary: #3b82f6; --primary-fg: #ffffff; --border: #374151; --code-bg: #1f2937; --code-text: #e5e7eb; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-    
-    /* UTILS & UI */
+    :root {
+      --bg: #f0f2f5; --surface: #ffffff; --text: #1f2937; --text-sec: #6b7280;
+      --primary: #2563eb; --primary-fg: #ffffff; --border: #e5e7eb;
+      --danger: #ef4444; --success: #10b981;
+      --brown: #795548; --light-brown: #a1887f;
+      --code-bg: #ffffff; --code-text: #1f2937;
+      --header-h: 60px;
+    }
+    [data-theme="dark"] {
+      --bg: #111827; --surface: #1f2937; --text: #f9fafb; --text-sec: #9ca3af;
+      --primary: #3b82f6; --primary-fg: #ffffff; --border: #374151;
+      --code-bg: #1f2937; --code-text: #e5e7eb;
+    }
+
+    body {
+      margin: 0; padding: 0; height: 100vh; overflow: hidden;
+      font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+      display: flex; flex-direction: column;
+    }
+
+    /* Views */
     .view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; background: var(--bg); }
     .view.active { display: flex; z-index: 10; }
+
+    /* Login Overlay */
+    #login-view { z-index: 1000; align-items: center; justify-content: center; }
+    .login-box { background: var(--surface); padding: 30px; border-radius: 12px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+    /* Header */
     header { background: var(--surface); height: var(--header-h); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
-    .btn-icon { background: transparent; border: none; color: var(--text); padding: 8px; cursor: pointer; display: flex; }
-    .filter-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
-    .chip { padding: 6px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: var(--text-sec); white-space: nowrap; }
+    .header-title { font-weight: 600; font-size: 1.1rem; }
+    .btn-icon { background: transparent; border: none; color: var(--text); padding: 8px; cursor: pointer; font-size: 1.2rem; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; align-items: center; flex-shrink: 0; }
+    .chip { padding: 6px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 0.9rem; white-space: nowrap; cursor: pointer; color: var(--text-sec); }
     .chip.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
-    #project-list { flex: 1; overflow-y: auto; padding: 0 16px 16px 16px; }
-    .card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; align-items: center; cursor: pointer; }
-    .card-info { flex: 1; min-width: 0; margin-left: 12px; }
-    .card-info h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 500; }
+    .chip.create-btn { border: 2px solid var(--success); color: var(--success); font-weight: 600; padding: 6px 12px; }
+
+    /* Project List */
+    #project-list { flex: 1; overflow-y: auto; padding: 0 16px 40px 16px; -webkit-overflow-scrolling: touch; }
+    .card { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; align-items: stretch; overflow: hidden; flex-shrink: 0; }
+    .card-content { display: flex; align-items: center; flex: 1; padding: 16px; cursor: pointer; min-width: 0; }
+    .card-icon { margin-right: 12px; color: var(--text-sec); }
+    .card-info { flex: 1; min-width: 0; }
+    .card-info h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-info p { margin: 0; font-size: 0.75rem; color: var(--text-sec); }
-    .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: var(--primary); color: var(--primary-fg); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
+    .card-action { width: 50px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--border); background: var(--surface); color: var(--text-sec); cursor: pointer; }
     
-    /* EDITOR */
-    #editor-area { flex: 1; background: var(--code-bg); color: var(--code-text); border: none; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 14px; resize: none; outline: none; white-space: pre; }
-    .toolbar { background: var(--surface); padding: 8px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; overflow-x: auto; }
-    .btn { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; font-weight: 500; cursor: pointer; white-space: nowrap; }
-    .btn-primary { background: var(--primary); color: var(--primary-fg); border: none; }
-    .btn-full { width: 100%; margin-bottom: 10px; }
-    #tabs-container { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; }
+    /* Editor */
+    #tabs-container { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; flex-shrink: 0; }
     .tab { padding: 12px 16px; font-size: 0.9rem; color: var(--text-sec); white-space: nowrap; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px; }
     .tab.selected { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
     .tab-icon { width: 10px; height: 10px; border-radius: 50%; }
+    #editor-area { flex: 1; background: var(--code-bg); color: var(--code-text); border: none; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: none; outline: none; white-space: pre; overflow: auto; -webkit-overflow-scrolling: touch; }
 
-    /* OVERLAYS */
+    /* Toolbar */
+    .toolbar { background: var(--surface); padding: 8px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; overflow-x: auto; flex-shrink: 0; }
+    .btn { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+    .btn-primary { background: var(--primary); color: var(--primary-fg); border: none; }
+    .btn-brown { background: var(--brown); color: white; border: none; }
+    .btn-light-brown { background: var(--light-brown); color: white; border: none; }
+    .btn-red { background: var(--danger); color: white; border: none; }
+    .btn-highlight { border: 2px solid var(--success); color: var(--success); background: transparent; font-weight: 600; }
+    .btn-full { width: 100%; margin-bottom: 10px; }
+
+    /* UI Elements */
+    .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-    .modal { background: var(--surface); padding: 24px; border-radius: 16px; width: 85%; max-width: 340px; display: flex; flex-direction: column; max-height: 80vh; }
+    .modal { background: var(--surface); padding: 24px; border-radius: 16px; width: 85%; max-width: 340px; display: flex; flex-direction: column; max-height: 80vh; overflow-y: auto; }
     .input-field { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem; }
     .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; color: white; flex-direction: column; }
     .spinner { border: 4px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 4px solid white; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -49,199 +83,258 @@
     .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; }
     .toast.show { opacity: 1; }
     .hidden { display: none !important; }
-    .list-select { overflow-y: auto; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; }
-    .list-option { padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
-    
-    /* SETUP SCREEN */
-    #setup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-    .setup-box { background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN SCREEN -->
-  <div id="setup-screen">
-    <div class="setup-box">
-      <h2>Mobile GAS IDE</h2>
-      <p style="color:var(--text-sec); font-size:0.9rem; margin-bottom:20px;">Enter API Password to access.</p>
-      <input id="api-pass" class="input-field" type="password" placeholder="Password">
-      <button class="btn btn-primary btn-full" onclick="saveConfig()">Login</button>
+  <!-- LOGIN VIEW -->
+  <div id="login-view" class="view active">
+    <div class="login-box">
+      <h2>Locked</h2>
+      <input type="password" id="api-password" class="input-field" placeholder="API Secret">
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Unlock</button>
     </div>
   </div>
 
-  <!-- MAIN APP -->
-  <div id="app-content" style="display:none;">
-    
-    <!-- HOME -->
-    <div id="view-home" class="view active">
-      <header><span class="header-title">GAS IDE</span><button id="theme-btn" class="btn-icon" onclick="toggleTheme()"></button></header>
-      <div class="filter-bar"><div class="chip active" onclick="setFilter('script', this)">Scripts</div><div class="chip" onclick="setFilter('sheet', this)">Sheets</div><div class="chip" onclick="setFilter('doc', this)">Docs</div><div class="chip" onclick="setFilter('form', this)">Forms</div></div>
-      <div style="padding:0 16px;"><input type="text" class="input-field" placeholder="Search..." oninput="handleSearch(this.value)"></div>
-      <div id="project-list">Loading...</div>
-      <button class="fab" onclick="showModal('create-project')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+  <!-- HOME VIEW -->
+  <div id="view-home" class="view">
+    <header>
+      <span class="header-title">GAS Mobile IDE</span>
+      <button id="theme-btn" class="btn-icon" onclick="toggleTheme()">🌗</button>
+    </header>
+    <div class="filter-bar">
+      <button class="chip create-btn" onclick="showModal('create-project')">+ New</button>
+      <div class="chip active" onclick="setFilter('script', this)">Scripts</div>
+      <div class="chip" onclick="setFilter('sheet', this)">Sheets</div>
+      <div class="chip" onclick="setFilter('doc', this)">Docs</div>
+      <div class="chip" onclick="setFilter('form', this)">Forms</div>
     </div>
-
-    <!-- EDITOR -->
-    <div id="view-editor" class="view">
-      <header><button class="btn-icon" onclick="switchView('view-home')"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button><span class="header-title" id="editor-title" style="font-size:0.9rem;">Project</span><button class="btn-icon" onclick="showFileMenu()"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button></header>
-      <div id="tabs-container"></div><textarea id="editor-area" spellcheck="false" oninput="markDirty()"></textarea>
-      <div class="toolbar"><button class="btn" onclick="showModal('create-file')">+ File</button><button class="btn" onclick="openDeployMenu()">Deploy</button><button class="btn" onclick="pasteOverwrite()">Overwrite</button><button class="btn btn-primary" id="save-btn" onclick="saveProject()">Save</button></div>
+    <div style="padding: 0 16px;">
+       <input type="text" class="input-field" placeholder="Search..." oninput="handleSearch(this.value)">
     </div>
-
-    <!-- MODALS -->
-    <div id="modal-overlay" class="modal-overlay">
-       <div id="modal-create-project" class="modal hidden"><h3>New Project</h3><input id="new-project-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateProject()">Create</button></div></div>
-       <div id="modal-link-script" class="modal hidden"><h3>Link Script</h3><input id="link-script-id" class="input-field" placeholder="Script ID"><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doLinkScript()">Link</button></div></div>
-       <div id="modal-deploy-choice" class="modal hidden"><h3>Deploy</h3><button class="btn btn-full btn-primary" onclick="initNewDeployment()">New Deployment</button><button class="btn btn-full" onclick="initUpdateDeployment()">Update Existing</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
-       <div id="modal-deploy-desc" class="modal hidden"><h3>Details</h3><input id="deploy-desc-input" class="input-field" placeholder="Description"><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="confirmDeploy()">Deploy</button></div></div>
-       <div id="modal-deploy-list" class="modal hidden"><h3>Select Version</h3><div id="deploy-list-container" class="list-select"></div><button class="btn btn-full" onclick="closeModal()">Cancel</button></div>
-       <div id="modal-deploy-result" class="modal hidden"><h3 style="color:var(--success)">Success!</h3><p id="deploy-result-ver"></p><a id="deploy-result-link" href="#" target="_blank" style="display:block; padding:15px; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--primary); word-break:break-all; font-size:0.8rem; margin-bottom:20px;"></a><button class="btn btn-full btn-primary" onclick="closeModal()">Done</button></div>
-       <div id="modal-create-file" class="modal hidden"><h3>New File</h3><input id="new-file-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px; margin-bottom:10px;"><button class="btn btn-primary" onclick="setFileType('SERVER_JS', this)">Script</button><button class="btn" onclick="setFileType('HTML', this)">HTML</button></div><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateFile()">Add</button></div></div>
-       <div id="modal-file-menu" class="modal hidden"><h3>Options</h3><button class="btn" style="color:var(--danger); border-color:var(--danger);" onclick="doDeleteFile()">Delete File</button><button class="btn" style="margin-top:10px;" onclick="closeModal()">Cancel</button></div>
-    </div>
-    <div id="loading-overlay" class="loading-overlay"><div class="spinner"></div><div id="loading-text">Loading...</div></div>
-    <div id="toast" class="toast">Message</div>
+    <div id="project-list">Loading...</div>
   </div>
+
+  <!-- EDITOR VIEW -->
+  <div id="view-editor" class="view">
+    <header>
+      <button class="btn-icon" onclick="switchView('view-home')">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <span class="header-title" id="editor-title" style="font-size: 0.9rem;">Project</span>
+      <button class="btn-icon" onclick="showFileMenu()">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+      </button>
+    </header>
+    <div id="tabs-container"></div>
+    <textarea id="editor-area" spellcheck="false" oninput="markDirty()"></textarea>
+    <div class="toolbar">
+      <button class="btn btn-highlight" onclick="showModal('create-file')">+ File</button>
+      <button class="btn btn-light-brown" onclick="copyFileContent()">Copy Content</button>
+      <button class="btn btn-brown" onclick="pasteOverwrite()">Full Overwrite</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveProject()">Save</button>
+      <button class="btn btn-red" onclick="openDeployMenu()">Deploy</button>
+    </div>
+  </div>
+
+  <!-- LOADERS/MODALS -->
+  <div id="loading-overlay" class="loading-overlay"><div class="spinner"></div><div id="loading-text">Loading...</div></div>
+  <div id="modal-overlay" class="modal-overlay">
+    <!-- Link Script -->
+    <div id="modal-link-script" class="modal hidden"><h3>Link Script</h3><div style="display:flex; gap:10px; margin-bottom:15px;"><input id="link-script-id" class="input-field" placeholder="Paste ID" style="margin:0; flex:1;"><button class="btn btn-brown" onclick="pasteToInput('link-script-id')" style="width: auto;">Paste</button></div><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doLinkScript()">Link</button></div></div>
+    <!-- Linked Options -->
+    <div id="modal-linked-options" class="modal hidden"><h3>Linked Script</h3><button class="btn btn-full btn-primary" onclick="renameSelectedProject()">Rename Project</button><button class="btn btn-full" onclick="openRelink()">Update Script ID</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="confirmUnlink()">Unlink</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
+    <!-- Standalone Options -->
+    <div id="modal-standalone-options" class="modal hidden"><h3>Project Options</h3><button class="btn btn-full btn-primary" onclick="renameSelectedProject()">Rename Project</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="confirmDeleteProject()">Delete Project</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
+    <!-- Deploy Choice -->
+    <div id="modal-deploy-choice" class="modal hidden"><h3>Deploy</h3><button class="btn btn-full btn-primary" onclick="initNewDeployment()">New Deployment</button><button class="btn btn-full" onclick="initUpdateDeployment()">Update Existing</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
+    <!-- Deploy Desc -->
+    <div id="modal-deploy-desc" class="modal hidden"><h3 id="deploy-desc-title">Details</h3><input id="deploy-desc-input" class="input-field" placeholder="Description"><label style="font-size:0.85rem; color:var(--text-sec); display:block; margin-top:10px;">Who has access:</label><select id="deploy-access-input" class="input-field" style="margin-top:5px;"><option value="MYSELF">Only me</option><option value="GOOGLE">Anyone with Google account</option><option value="ANYONE" selected>Anyone (Anonymous)</option></select><div style="display:flex; gap:10px; margin-top:15px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="confirmDeploy()">Deploy</button></div></div>
+    <!-- Deploy Result -->
+    <div id="modal-deploy-result" class="modal hidden"><h3 style="color:var(--success)">Success!</h3><p id="deploy-result-ver"></p><a id="deploy-result-link" href="#" target="_blank" style="display:block; padding:15px; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--primary); word-break:break-all; font-size:0.85rem; margin-bottom:20px;"></a><button class="btn btn-full btn-primary" onclick="closeModal()">Done</button></div>
+    <!-- Creates -->
+    <div id="modal-create-project" class="modal hidden"><h3>New Project</h3><input id="new-project-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateProject()">Create</button></div></div>
+    <div id="modal-create-file" class="modal hidden"><h3>New File</h3><input id="new-file-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px; margin-bottom:10px;"><button class="btn btn-primary" onclick="setFileType('SERVER_JS', this)">Script</button><button class="btn" onclick="setFileType('HTML', this)">HTML</button></div><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateFile()">Add</button></div></div>
+    <!-- File Menu -->
+    <div id="modal-file-menu" class="modal hidden"><h3>Options</h3><button class="btn btn-full" onclick="renameCurrentFile()">Rename Current File</button><button class="btn btn-full" onclick="renameCurrentProject()">Rename Project</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="doDeleteFile()">Delete Current File</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
+  </div>
+  <div id="toast" class="toast">Message</div>
 
   <script>
-    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    // --- CONFIGURATION ---
+    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
     
-    // --- CONFIG ---
-    const HARDCODED_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
-    let CONFIG = { url: HARDCODED_URL, pass: localStorage.getItem('gas_pass') };
-    let state = { theme: localStorage.getItem('theme')||'light', projects:[], currentScriptId:null, currentContainerId:null, files:[], activeFileIndex:0, newFileType:'SERVER_JS', isDirty:false, deployMode: null, selectedDeployId: null };
+    // --- STATE ---
+    let state = { theme: localStorage.getItem('theme')||'light', apiKey:'', projects:[], currentScriptId:null, currentContainerId:null, selectedItem:null, files:[], activeFileIndex:0, newFileType:'SERVER_JS', isDirty:false, deployMode: null, selectedDeployId: null };
 
-    // --- SETUP & AUTH ---
-    function saveConfig() {
-      const p = document.getElementById('api-pass').value.trim();
-      if(!p) return alert("Please enter password");
-      localStorage.setItem('gas_pass', p);
-      CONFIG.pass = p;
-      location.reload();
-    }
-    
-    // Check if we have a password saved
-    if(CONFIG.pass) {
-      document.getElementById('setup-screen').style.display = 'none';
-      document.getElementById('app-content').style.display = 'block';
-      initTheme();
-      setFilter('script', document.querySelector('.chip.active'));
-    }
+    // --- INIT ---
+    function initTheme() { document.body.setAttribute('data-theme', state.theme); }
+    function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; localStorage.setItem('theme',state.theme); initTheme(); }
+    initTheme();
 
-    // --- API CLIENT ---
-    async function apiCall(action, args = []) {
+    // --- API CALLER ---
+    async function api(action, payload = {}) {
+      payload.action = action;
+      payload.password = state.apiKey;
+      
       try {
-        const res = await fetch(CONFIG.url, {
+        const res = await fetch(BACKEND_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ password: CONFIG.pass, action: action, args: args })
+          body: JSON.stringify(payload)
         });
         const json = await res.json();
         if(json.status === 'error') throw new Error(json.message);
         return json.data;
       } catch (err) {
-        throw new Error(err.message);
+        throw new Error(err.message || "Network Error");
       }
     }
 
-    // --- UI LOGIC ---
-    function initTheme() {
-      document.body.setAttribute('data-theme', state.theme);
-      document.getElementById('theme-btn').innerHTML = state.theme === 'dark' 
-        ? '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>'
-        : '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+    // --- LOGIN ---
+    function doLogin() {
+      const pwd = document.getElementById('api-password').value;
+      if(!pwd) return alert("Enter password");
+      state.apiKey = pwd;
+      switchView('view-home');
+      setFilter('script', document.querySelector('.chip.active'));
     }
-    function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; localStorage.setItem('theme',state.theme); initTheme(); }
-    function setFilter(type, el) {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
-      document.getElementById('project-list').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-sec);">Loading...</div>';
-      apiCall('getProjects', [type]).then(list => { state.projects=list; renderList(list); }).catch(e=>document.getElementById('project-list').innerText=e.message);
+
+    // --- NAVIGATION ---
+    function switchView(id) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function showModal(id) { document.getElementById('modal-overlay').style.display='flex'; document.querySelectorAll('.modal').forEach(e=>e.classList.add('hidden')); document.getElementById('modal-'+id).classList.remove('hidden'); }
+    function closeModal() { document.getElementById('modal-overlay').style.display='none'; }
+    function toast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+    function showLoading(txt) { document.getElementById('loading-text').innerText=txt; document.getElementById('loading-overlay').style.display='flex'; }
+    function hideLoading() { document.getElementById('loading-overlay').style.display='none'; }
+
+    // --- LOGIC ---
+    function setFilter(type, el) { 
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); 
+      if(el) el.classList.add('active'); 
+      document.getElementById('project-list').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-sec);">Loading...</div>'; 
+      api('getProjects', { type: type })
+        .then(list => { state.projects=list; renderList(list); })
+        .catch(e => { document.getElementById('project-list').innerHTML = `<div style="text-align:center; padding:30px; color:var(--danger);">Error: ${e.message}</div>`; });
     }
+
     function renderList(list) {
       const el = document.getElementById('project-list'); el.innerHTML = '';
       if(list.length === 0) { el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-sec);">No files found.</div>'; return; }
       list.forEach(p => {
-        const icon = p.mime.includes('script') ? '<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>' : '<svg class="icon" style="color:#10b981" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>';
+        const icon = getIcon(p.mime);
+        let actionHtml = '';
+        if (p.mime.includes('script') || p.linkedScriptId) {
+            actionHtml = `<div class="card-action" onclick='handleAction(event, ${JSON.stringify(p)})'><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></div>`;
+        }
         const div = document.createElement('div'); div.className = 'card';
-        div.innerHTML = `<div class="card-icon">${icon}</div><div class="card-info"><h3>${p.linkedScriptId ? p.name : p.name}</h3><p>${p.updated}</p></div>`;
-        div.onclick = () => handleItemClick(p); el.appendChild(div);
+        div.innerHTML = `<div class="card-content" onclick='handleItemClick(${JSON.stringify(p)})'><div class="card-icon">${icon}</div><div class="card-info"><h3>${p.linkedScriptId ? p.name : p.name}</h3><p>${p.updated}</p></div></div>${actionHtml}`;
+        el.appendChild(div);
       });
     }
+
+    function getIcon(mime) {
+      if(mime.includes('spreadsheet')) return '<svg class="icon" style="color:#10b981" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>';
+      if(mime.includes('document')) return '<svg class="icon" style="color:#2563eb" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
+      if(mime.includes('form')) return '<svg class="icon" style="color:#7248b9" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>';
+      return '<svg class="icon" style="color:#4285f4" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
+    }
+
     function handleItemClick(p) {
+      state.selectedItem = p;
       if (p.linkedScriptId) { openProject(p.linkedScriptId, p.name); return; }
       if(p.mime.includes('script')) { openProject(p.id, p.name); return; }
       state.currentContainerId = p.id; showModal('link-script');
     }
-    function doLinkScript() {
-      const id = document.getElementById('link-script-id').value.trim(); if(!id) return alert("Enter ID");
-      closeModal(); toast("Linking...");
-      apiCall('saveLinkedScriptId', [state.currentContainerId, id]).then(() => { setFilter('script', document.querySelector('.filter-bar .chip')); toast("Linked!"); });
+
+    function handleAction(e, p) {
+      e.stopPropagation(); state.selectedItem = p;
+      if (p.linkedScriptId) showModal('linked-options'); 
+      else if (p.mime.includes('script')) showModal('standalone-options');
     }
+
+    // --- ACTIONS ---
     function openProject(id, name) {
       state.currentScriptId = id; document.getElementById('editor-title').innerText = name; switchView('view-editor');
       document.getElementById('editor-area').value = "Loading..."; document.getElementById('tabs-container').innerHTML = '';
-      apiCall('getProjectContent', [id]).then(files => { state.files = files; state.activeFileIndex = 0; renderTabs(); loadEditor(); }).catch(e=>alert(e.message));
+      api('getContent', { id: id })
+        .then(files => { state.files = files; state.activeFileIndex = 0; renderTabs(); loadEditor(); })
+        .catch(e => alert(e.message));
     }
+
     function renderTabs() {
       const el = document.getElementById('tabs-container'); el.innerHTML = '';
       state.files.forEach((f, i) => {
         const div = document.createElement('div'); div.className = `tab ${i===state.activeFileIndex?'selected':''}`;
         div.innerHTML = `<div class="tab-icon" style="background:${f.type==='SERVER_JS'?'#2563eb':'#e37400'}"></div>${f.name}`;
-        div.onclick = () => { state.files[state.activeFileIndex].source=document.getElementById('editor-area').value; state.activeFileIndex=i; renderTabs(); loadEditor(); };
+        div.onclick = () => { state.files[state.activeFileIndex].source = document.getElementById('editor-area').value; state.activeFileIndex=i; renderTabs(); loadEditor(); };
         el.appendChild(div);
       });
     }
+
     function loadEditor() { document.getElementById('editor-area').value = state.files[state.activeFileIndex].source; state.isDirty = false; document.getElementById('save-btn').innerText = "Save"; }
     function markDirty() { if(!state.isDirty) { state.isDirty=true; document.getElementById('save-btn').innerText="Save*"; } }
-    async function pasteOverwrite() {
-      try { const text = await navigator.clipboard.readText(); if(text) { document.getElementById('editor-area').value = text; markDirty(); toast("Pasted"); } } catch (e) { alert("Clipboard blocked. Paste manually."); }
-    }
+
     function saveProject() {
       state.files[state.activeFileIndex].source = document.getElementById('editor-area').value;
       const btn = document.getElementById('save-btn'); btn.innerText="Saving..."; btn.disabled=true;
-      const json = JSON.stringify(state.files); const chunks = []; const CHUNK_SIZE = 40000;
-      for (let i = 0; i < json.length; i += CHUNK_SIZE) chunks.push(json.substring(i, i + CHUNK_SIZE));
-      apiCall('handleChunkedSave', [state.currentScriptId, chunks])
-        .then(msg => { toast(msg); state.isDirty=false; btn.innerText="Save"; btn.disabled=false; })
+      api('saveContent', { id: state.currentScriptId, files: state.files })
+        .then(() => { toast("Saved!"); state.isDirty=false; btn.innerText="Save"; btn.disabled=false; })
         .catch(e => { alert(e.message); btn.innerText="Save*"; btn.disabled=false; });
     }
-    // Deploy
-    function openDeployMenu() { showModal('deploy-choice'); }
-    function initNewDeployment() { state.deployMode = 'NEW'; document.getElementById('deploy-desc-title').innerText = "New Deployment"; showModal('deploy-desc'); }
-    function initUpdateDeployment() {
-      state.deployMode = 'UPDATE'; showModal('deploy-list'); document.getElementById('deploy-list-container').innerHTML = '<div style="padding:20px;">Loading...</div>';
-      apiCall('getActiveDeployments', [state.currentScriptId]).then(list => {
-        const con = document.getElementById('deploy-list-container'); con.innerHTML = '';
-        if(list.length === 0) { con.innerHTML = '<div style="padding:20px;">No deployments.</div>'; return; }
-        list.forEach(d => {
-          const div = document.createElement('div'); div.className = 'list-option';
-          div.innerHTML = `<strong>v${d.version}</strong><span>${d.description}</span>`;
-          div.onclick = () => { state.selectedDeployId = d.id; document.getElementById('deploy-desc-title').innerText = "Update v" + d.version; showModal('deploy-desc'); };
-          con.appendChild(div);
-        });
-      });
-    }
+
+    // --- DEPLOY ---
     function confirmDeploy() {
-      const desc = document.getElementById('deploy-desc-input').value || "Update"; closeModal(); showLoading("Deploying...");
-      const handler = (res) => { hideLoading(); document.getElementById('deploy-result-ver').innerText = "v" + res.version + " Success"; document.getElementById('deploy-result-link').href = res.url; document.getElementById('deploy-result-link').innerText = res.url; showModal('deploy-result'); };
-      const action = state.deployMode === 'NEW' ? 'createNewDeployment' : 'updateExistingDeployment';
-      const args = state.deployMode === 'NEW' ? [state.currentScriptId, desc] : [state.currentScriptId, state.selectedDeployId, desc];
-      apiCall(action, args).then(handler).catch(e => { hideLoading(); alert(e.message); });
+      const desc = document.getElementById('deploy-desc-input').value || "Update";
+      const access = document.getElementById('deploy-access-input').value;
+      closeModal(); showLoading("Deploying (This may take 10s)...");
+      api('deploy', { id: state.currentScriptId, desc: desc, access: access, isNew: state.deployMode === 'NEW' })
+        .then(res => {
+          hideLoading();
+          document.getElementById('deploy-result-ver').innerText = "v" + res.version + " Success";
+          const link = document.getElementById('deploy-result-link'); link.href = res.url; link.innerText = res.url;
+          showModal('deploy-result');
+        })
+        .catch(e => { hideLoading(); alert(e.message); });
     }
 
-    // Utils
-    function switchView(id) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function showModal(id) { document.getElementById('modal-overlay').style.display='flex'; document.querySelectorAll('.modal').forEach(e=>e.classList.add('hidden')); document.getElementById('modal-'+id).classList.remove('hidden'); }
-    function closeModal() { document.getElementById('modal-overlay').style.display='none'; }
-    function toast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+    // --- OTHER OPS ---
+    function doCreateProject() {
+      const n=document.getElementById('new-project-name').value;
+      if(n) { closeModal(); showLoading("Creating..."); api('createProject', { title: n }).then(() => { hideLoading(); setFilter('script', document.querySelector('.chip.active')); }).catch(e => { hideLoading(); alert(e.message); }); }
+    }
+    function performDelete(p) {
+      showLoading("Deleting..."); api('deleteProject', { id: p.id }).then(() => { hideLoading(); toast("Deleted"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => { hideLoading(); alert(e.message); });
+    }
+    function renameSelectedProject() {
+      const newName = prompt("Rename:", state.selectedItem.name);
+      if(newName) { closeModal(); showLoading("Renaming..."); api('renameProject', { id: state.selectedItem.id, newName: newName }).then(() => { hideLoading(); toast("Renamed"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => { hideLoading(); alert(e.message); }); }
+    }
+    function doLinkScript() {
+      const id = document.getElementById('link-script-id').value.trim();
+      if(id) { closeModal(); toast("Linking..."); api('linkScript', { containerId: state.currentContainerId, scriptId: id }).then(() => toast("Linked!")).catch(e => alert(e.message)); }
+    }
+    function confirmUnlink() {
+      closeModal(); showLoading("Unlinking..."); api('unlinkScript', { containerId: state.selectedItem.id }).then(() => { hideLoading(); toast("Unlinked"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => alert(e.message));
+    }
+
+    // --- UTILS ---
     function handleSearch(val) { const f = state.projects.filter(p => p.name.toLowerCase().includes(val.toLowerCase())); renderList(f); }
-    function showLoading(txt) { document.getElementById('loading-text').innerText=txt; document.getElementById('loading-overlay').style.display='flex'; }
-    function hideLoading() { document.getElementById('loading-overlay').style.display='none'; }
-    function doCreateProject() { const n=document.getElementById('new-project-name').value; if(n){ closeModal(); showLoading("Creating..."); apiCall('createNewProject', [n]).then(()=>{ hideLoading(); setFilter('script',document.querySelector('.chip.active'));}); }}
+    async function pasteOverwrite() { try { const text = await navigator.clipboard.readText(); if(text) { document.getElementById('editor-area').value = text; markDirty(); toast("Pasted!"); } } catch(e) { alert("Clipboard API unavailable. Paste manually."); } }
+    function copyFileContent() { navigator.clipboard.writeText(document.getElementById('editor-area').value).then(() => toast("Copied!")); }
+    async function pasteToInput(id) { try { const text = await navigator.clipboard.readText(); if(text) document.getElementById(id).value = text; } catch(e) {} }
+    
+    // UI Modals
+    function openDeployMenu() { showModal('deploy-choice'); }
+    function initNewDeployment() { state.deployMode = 'NEW'; showModal('deploy-desc'); }
+    function initUpdateDeployment() { state.deployMode = 'UPDATE'; showModal('deploy-desc'); } // Simplified for now
+    function showFileMenu() { showModal('file-menu'); }
     function setFileType(t,b) { state.newFileType=t; b.parentNode.querySelectorAll('.btn').forEach(x=>x.classList.remove('btn-primary')); b.classList.add('btn-primary'); }
     function doCreateFile() { const n=document.getElementById('new-file-name').value; if(n){ state.files.push({name:n,type:state.newFileType,source:state.newFileType==='HTML'?'<html></html>':'function myFunction(){}'}); closeModal(); state.activeFileIndex=state.files.length-1; renderTabs(); loadEditor(); markDirty(); }}
-    function showFileMenu() { showModal('modal-file-menu'); }
+    function renameCurrentFile() { const currentFile = state.files[state.activeFileIndex]; const newName = prompt("New filename:", currentFile.name); if (newName && newName !== currentFile.name) { currentFile.name = newName; renderTabs(); markDirty(); closeModal(); toast("Renamed File"); } }
+    function renameCurrentProject() { const newName = prompt("Rename Project:", document.getElementById('editor-title').innerText); if (newName) { closeModal(); showLoading("Renaming..."); api('renameProject', { id: state.currentScriptId, newName: newName }).then(() => { hideLoading(); toast("Renamed"); document.getElementById('editor-title').innerText = newName; }).catch(e => { hideLoading(); alert(e.message); }); } }
     function doDeleteFile() { if(state.files.length>1){ state.files.splice(state.activeFileIndex,1); state.activeFileIndex=0; closeModal(); renderTabs(); loadEditor(); markDirty(); } else alert("Cannot delete last file"); }
+    function openRelink() { closeModal(); state.currentContainerId = state.selectedItem.id; showModal('link-script'); }
+    function confirmDeleteProject() { if(!confirm("Move '" + state.selectedItem.name + "' to Trash?")) return; closeModal(); performDelete(state.selectedItem); }
   </script>
 </body>
 </html>
