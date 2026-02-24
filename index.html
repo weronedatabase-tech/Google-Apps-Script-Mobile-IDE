@@ -1,421 +1,352 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GAS Mobile IDE</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    /* VARIABLES */
-    :root {
-      --bg: #f0f2f5; --surface: #ffffff; --text: #1f2937; --text-sec: #6b7280;
-      --primary: #2563eb; --primary-fg: #ffffff; --border: #e5e7eb;
-      --danger: #ef4444; --success: #10b981;
-      --brown: #795548;
-      --light-brown: #a1887f;
-      --code-bg: #ffffff; --code-text: #1f2937;
-      --header-h: 60px;
-    }
-    [data-theme="dark"] {
-      --bg: #111827; --surface: #1f2937; --text: #f9fafb; --text-sec: #9ca3af;
-      --primary: #3b82f6; --primary-fg: #ffffff; --border: #374151;
-      --code-bg: #1f2937; --code-text: #e5e7eb;
-    }
-
-    body {
-      margin: 0; padding: 0; height: 100vh; overflow: hidden;
-      font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-      display: flex; flex-direction: column;
-    }
-
-    /* Views */
-    .view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; background: var(--bg); }
-    .view.active { display: flex; z-index: 10; }
-
-    /* Login Overlay */
-    #login-view { z-index: 1000; align-items: center; justify-content: center; }
-    .login-box { background: var(--surface); padding: 30px; border-radius: 12px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
-    /* Header */
-    header { background: var(--surface); height: var(--header-h); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .header-title { font-weight: 600; font-size: 1.1rem; }
-    .btn-icon { background: transparent; border: none; color: var(--text); padding: 8px; cursor: pointer; font-size: 1.2rem; }
-
-    /* Filter Bar */
-    .filter-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; align-items: center; flex-shrink: 0; }
-    .chip { padding: 6px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 0.9rem; white-space: nowrap; cursor: pointer; color: var(--text-sec); }
-    .chip.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
-    .chip.create-btn { border: 2px solid var(--success); color: var(--success); font-weight: 600; padding: 6px 12px; }
-
-    /* Project List */
-    #project-list { flex: 1; overflow-y: auto; padding: 0 16px 40px 16px; -webkit-overflow-scrolling: touch; }
-    .card { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; align-items: stretch; overflow: hidden; flex-shrink: 0; }
-    .card-content { display: flex; align-items: center; flex: 1; padding: 16px; cursor: pointer; min-width: 0; }
-    .card-icon { margin-right: 12px; color: var(--text-sec); }
-    .card-info { flex: 1; min-width: 0; }
-    .card-info h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-info p { margin: 0; font-size: 0.75rem; color: var(--text-sec); }
-    .card-action { width: 50px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--border); background: var(--surface); color: var(--text-sec); cursor: pointer; }
-    .card-action.danger { color: var(--danger); }
-
-    /* Editor */
-    #tabs-container { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; flex-shrink: 0; }
-    .tab { padding: 12px 16px; font-size: 0.9rem; color: var(--text-sec); white-space: nowrap; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px; }
-    .tab.selected { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
-    .tab-icon { width: 10px; height: 10px; border-radius: 50%; }
-    #editor-area { flex: 1; background: var(--code-bg); color: var(--code-text); border: none; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: none; outline: none; white-space: pre; overflow: auto; -webkit-overflow-scrolling: touch; }
-
-    /* TOOLBAR (UPDATED FOR AUTO-FIT) */
-    .toolbar { 
-        background: var(--surface); 
-        padding: 10px; 
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* iOS Safe Area */
-        border-top: 1px solid var(--border); 
-        display: flex; 
-        flex-wrap: wrap; /* Allows wrapping to new line */
-        gap: 8px; 
-        flex-shrink: 0; 
-    }
-    
-    .btn { 
-        flex: 1 1 auto; /* Grow to fill space */
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: var(--text); 
-        padding: 10px 12px; 
-        border-radius: 8px; 
-        font-weight: 500; 
-        cursor: pointer; 
-        white-space: nowrap; 
-        text-align: center;
-        font-size: 0.9rem;
-    }
-    
-    .btn-primary { background: var(--primary); color: var(--primary-fg); border: none; }
-    .btn-brown { background: var(--brown); color: white; border: none; }
-    .btn-light-brown { background: var(--light-brown); color: white; border: none; }
-    .btn-red { background: var(--danger); color: white; border: none; }
-    .btn-highlight { border: 2px solid var(--success); color: var(--success); background: transparent; font-weight: 600; }
-    .btn-full { width: 100%; margin-bottom: 10px; }
-
-    /* UI Elements */
-    .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-    .modal { background: var(--surface); padding: 24px; border-radius: 16px; width: 85%; max-width: 340px; display: flex; flex-direction: column; max-height: 80vh; overflow-y: auto; }
-    .input-field { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem; }
-    
-    /* Paste Fallback Area */
-    .paste-area { width: 100%; height: 150px; font-family: monospace; font-size: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; resize: none; padding: 10px; box-sizing: border-box; }
-
-    .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; color: white; flex-direction: column; }
-    .spinner { border: 4px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 4px solid white; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; }
-    .toast.show { opacity: 1; }
-    .hidden { display: none !important; }
-    
-    .list-select { overflow-y: auto; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; }
-    .list-option { padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
-    .list-option:last-child { border-bottom: none; }
-    .list-option:hover { background: var(--bg); }
-    .list-option strong { display: block; font-size: 0.95rem; }
-    .list-option span { font-size: 0.8rem; color: var(--text-sec); }
-  </style>
-</head>
-<body>
-
-  <!-- LOGIN VIEW -->
-  <div id="login-view" class="view active">
-    <div class="login-box">
-      <h2>Locked</h2>
-      <input type="password" id="api-password" class="input-field" placeholder="API Secret">
-      <button class="btn btn-primary btn-full" onclick="doLogin()">Unlock</button>
-    </div>
-  </div>
-
-  <!-- HOME VIEW -->
-  <div id="view-home" class="view">
-    <header>
-      <span class="header-title">GAS Mobile IDE</span>
-      <button id="theme-btn" class="btn-icon" onclick="toggleTheme()">🌗</button>
-    </header>
-    <div class="filter-bar">
-      <button class="chip create-btn" onclick="showModal('create-project')">+ New</button>
-      <div class="chip active" onclick="setFilter('script', this)">Scripts</div>
-      <div class="chip" onclick="setFilter('sheet', this)">Sheets</div>
-      <div class="chip" onclick="setFilter('doc', this)">Docs</div>
-      <div class="chip" onclick="setFilter('form', this)">Forms</div>
-    </div>
-    <div style="padding: 0 16px;">
-       <input type="text" class="input-field" placeholder="Search..." oninput="handleSearch(this.value)">
-    </div>
-    <div id="project-list">Loading...</div>
-  </div>
-
-  <!-- EDITOR VIEW -->
-  <div id="view-editor" class="view">
-    <header>
-      <button class="btn-icon" onclick="switchView('view-home')">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      </button>
-      <span class="header-title" id="editor-title" style="font-size: 0.9rem;">Project</span>
-      <button class="btn-icon" onclick="showFileMenu()">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-      </button>
-    </header>
-    <div id="tabs-container"></div>
-    <textarea id="editor-area" spellcheck="false" oninput="markDirty()"></textarea>
-    
-    <div class="toolbar">
-      <button class="btn btn-highlight" onclick="showModal('create-file')">+ File</button>
-      <button class="btn btn-light-brown" onclick="copyFileContent()">Copy Content</button>
-      <button class="btn btn-brown" onclick="pasteOverwrite()">Full Overwrite</button>
-      <button class="btn btn-primary" id="save-btn" onclick="saveProject()">Save</button>
-      <button class="btn btn-red" onclick="openDeployMenu()">Deploy</button>
-    </div>
-  </div>
-
-  <!-- LOADERS/MODALS -->
-  <div id="loading-overlay" class="loading-overlay"><div class="spinner"></div><div id="loading-text">Loading...</div></div>
-  <div id="modal-overlay" class="modal-overlay">
-    
-    <!-- Manual Paste Modal (Fallback) -->
-    <div id="modal-paste-fallback" class="modal hidden">
-      <h3>Paste Content</h3>
-      <div style="font-size:0.85rem; color:var(--text-sec); margin-bottom:10px;">
-        Browser security blocked automatic paste. Tap the box below and select "Paste".
-      </div>
-      <textarea id="paste-input-area" class="paste-area"></textarea>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-brown" onclick="confirmManualPaste()">Overwrite</button>
-      </div>
-    </div>
-
-    <!-- Link Script -->
-    <div id="modal-link-script" class="modal hidden"><h3>Link Script</h3><div style="display:flex; gap:10px; margin-bottom:15px;"><input id="link-script-id" class="input-field" placeholder="Paste ID" style="margin:0; flex:1;"><button class="btn btn-brown" onclick="pasteToInput('link-script-id')" style="width: auto;">Paste</button></div><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doLinkScript()">Link</button></div></div>
-    <!-- Linked Options -->
-    <div id="modal-linked-options" class="modal hidden"><h3>Linked Script</h3><button class="btn btn-full btn-primary" onclick="renameSelectedProject()">Rename Project</button><button class="btn btn-full" onclick="openRelink()">Update Script ID</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="confirmUnlink()">Unlink</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
-    <!-- Standalone Options -->
-    <div id="modal-standalone-options" class="modal hidden"><h3>Project Options</h3><button class="btn btn-full btn-primary" onclick="renameSelectedProject()">Rename Project</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="confirmDeleteProject()">Delete Project</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
-    <!-- Deploy Choice -->
-    <div id="modal-deploy-choice" class="modal hidden"><h3>Deploy</h3><button class="btn btn-full btn-primary" onclick="initNewDeployment()">New Deployment</button><button class="btn btn-full" onclick="initUpdateDeployment()">Update Existing</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
-    <!-- Deploy Desc -->
-    <div id="modal-deploy-desc" class="modal hidden"><h3 id="deploy-desc-title">Details</h3><input id="deploy-desc-input" class="input-field" placeholder="Description"><label style="font-size:0.85rem; color:var(--text-sec); display:block; margin-top:10px;">Who has access:</label><select id="deploy-access-input" class="input-field" style="margin-top:5px;"><option value="MYSELF">Only me</option><option value="GOOGLE">Anyone with Google account</option><option value="ANYONE" selected>Anyone (Anonymous)</option></select><div style="display:flex; gap:10px; margin-top:15px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="confirmDeploy()">Deploy</button></div></div>
-    <!-- Deploy Result -->
-    <div id="modal-deploy-result" class="modal hidden"><h3 style="color:var(--success)">Success!</h3><p id="deploy-result-ver"></p><a id="deploy-result-link" href="#" target="_blank" style="display:block; padding:15px; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--primary); word-break:break-all; font-size:0.85rem; margin-bottom:20px;"></a><button class="btn btn-full btn-primary" onclick="closeModal()">Done</button></div>
-    <!-- Creates -->
-    <div id="modal-create-project" class="modal hidden"><h3>New Project</h3><input id="new-project-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateProject()">Create</button></div></div>
-    <div id="modal-create-file" class="modal hidden"><h3>New File</h3><input id="new-file-name" class="input-field" placeholder="Name"><div style="display:flex; gap:10px; margin-bottom:10px;"><button class="btn btn-primary" onclick="setFileType('SERVER_JS', this)">Script</button><button class="btn" onclick="setFileType('HTML', this)">HTML</button></div><div style="display:flex; gap:10px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="doCreateFile()">Add</button></div></div>
-    <!-- File Menu -->
-    <div id="modal-file-menu" class="modal hidden"><h3>Options</h3><button class="btn btn-full" onclick="renameCurrentFile()">Rename Current File</button><button class="btn btn-full" onclick="renameCurrentProject()">Rename Project</button><button class="btn btn-full" style="color:var(--danger); border-color:var(--danger);" onclick="doDeleteFile()">Delete Current File</button><button class="btn btn-full" style="margin-top:10px; border:none;" onclick="closeModal()">Cancel</button></div>
-  </div>
-  <div id="toast" class="toast">Message</div>
-
-  <script>
-    // --- CONFIGURATION ---
-    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
-    
-    // --- STATE ---
-    let state = { theme: localStorage.getItem('theme')||'light', apiKey:'', projects:[], currentScriptId:null, currentContainerId:null, selectedItem:null, files:[], activeFileIndex:0, newFileType:'SERVER_JS', isDirty:false, deployMode: null, selectedDeployId: null };
-
-    // --- INIT ---
-    function initTheme() { document.body.setAttribute('data-theme', state.theme); }
-    function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; localStorage.setItem('theme',state.theme); initTheme(); }
-    initTheme();
-
-    // --- API CALLER ---
-    async function api(action, payload = {}) {
-      payload.action = action;
-      payload.password = state.apiKey;
-      try {
-        const res = await fetch(BACKEND_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if(json.status === 'error') throw new Error(json.message);
-        return json.data;
-      } catch (err) {
-        throw new Error(err.message || "Network Error");
-      }
-    }
-
-    // --- LOGIN ---
-    function doLogin() {
-      const pwd = document.getElementById('api-password').value;
-      if(!pwd) return alert("Enter password");
-      state.apiKey = pwd;
-      switchView('view-home');
-      setFilter('script', document.querySelector('.chip.active'));
-    }
-
-    // --- NAVIGATION ---
-    function switchView(id) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function showModal(id) { document.getElementById('modal-overlay').style.display='flex'; document.querySelectorAll('.modal').forEach(e=>e.classList.add('hidden')); document.getElementById('modal-'+id).classList.remove('hidden'); }
-    function closeModal() { document.getElementById('modal-overlay').style.display='none'; }
-    function toast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-    function showLoading(txt) { document.getElementById('loading-text').innerText=txt; document.getElementById('loading-overlay').style.display='flex'; }
-    function hideLoading() { document.getElementById('loading-overlay').style.display='none'; }
-
-    // --- LOGIC ---
-    function setFilter(type, el) { 
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); 
-      if(el) el.classList.add('active'); 
-      document.getElementById('project-list').innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-sec);">Loading...</div>'; 
-      api('getProjects', { type: type })
-        .then(list => { state.projects=list; renderList(list); })
-        .catch(e => { document.getElementById('project-list').innerHTML = `<div style="text-align:center; padding:30px; color:var(--danger);">Error: ${e.message}</div>`; });
-    }
-
-    function renderList(list) {
-      const el = document.getElementById('project-list'); el.innerHTML = '';
-      if(list.length === 0) { el.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-sec);">No files found.</div>'; return; }
-      list.forEach(p => {
-        const icon = getIcon(p.mime);
-        let actionHtml = '';
-        if (p.mime.includes('script') || p.linkedScriptId) {
-            actionHtml = `<div class="card-action" onclick='handleAction(event, ${JSON.stringify(p)})'><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></div>`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GAS Mobile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { slate: { 950: '#0f172a' } } } }
         }
-        const div = document.createElement('div'); div.className = 'card';
-        div.innerHTML = `<div class="card-content" onclick='handleItemClick(${JSON.stringify(p)})'><div class="card-icon">${icon}</div><div class="card-info"><h3>${p.linkedScriptId ? p.name : p.name}</h3><p>${p.updated}</p></div></div>${actionHtml}`;
-        el.appendChild(div);
-      });
-    }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .loader { border: 3px solid rgba(128,128,128,0.3); border-radius: 50%; border-top: 3px solid #3b82f6; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        textarea, input { font-size: 14px !important; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; white-space: nowrap; }
+        .toast.show { opacity: 1; }
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        html.dark .modal-bg { background: rgba(0,0,0,0.8); }
+    </style>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-50 text-slate-900 dark:bg-slate-950 dark:text-gray-100 transition-colors duration-200">
+    <div id="root"></div>
+    <div id="toast" class="toast">Message</div>
 
-    function getIcon(mime) {
-      if(mime.includes('spreadsheet')) return '<svg class="icon" style="color:#10b981" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>';
-      if(mime.includes('document')) return '<svg class="icon" style="color:#2563eb" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
-      if(mime.includes('form')) return '<svg class="icon" style="color:#7248b9" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>';
-      return '<svg class="icon" style="color:#4285f4" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
-    }
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from "https://esm.sh/react@18.2.0";
+        import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
 
-    function handleItemClick(p) {
-      state.selectedItem = p;
-      if (p.linkedScriptId) { openProject(p.linkedScriptId, p.name); return; }
-      if(p.mime.includes('script')) { openProject(p.id, p.name); return; }
-      state.currentContainerId = p.id; showModal('link-script');
-    }
+        // --- CONFIG ---
+        // PASTE YOUR WEB APP URL HERE:
+        const API_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
 
-    function handleAction(e, p) {
-      e.stopPropagation(); state.selectedItem = p;
-      if (p.linkedScriptId) showModal('linked-options'); 
-      else if (p.mime.includes('script')) showModal('standalone-options');
-    }
+        // --- ICONS ---
+        const Icons = {
+            Script: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-blue-500"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+            Sheet: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-emerald-500"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
+            Doc: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-sky-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+            Form: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-purple-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+            Zap: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Globe: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+            Back: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>,
+            Paste: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
+            Save: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        };
 
-    // --- ACTIONS ---
-    function openProject(id, name) {
-      state.currentScriptId = id; document.getElementById('editor-title').innerText = name; switchView('view-editor');
-      document.getElementById('editor-area').value = "Loading..."; document.getElementById('tabs-container').innerHTML = '';
-      api('getContent', { id: id })
-        .then(files => { state.files = files; state.activeFileIndex = 0; renderTabs(); loadEditor(); })
-        .catch(e => alert(e.message));
-    }
+        function App() {
+            const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+            useEffect(() => { document.documentElement.classList.toggle('dark', theme === 'dark'); localStorage.setItem("theme", theme); }, [theme]);
+            const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
-    function renderTabs() {
-      const el = document.getElementById('tabs-container'); el.innerHTML = '';
-      state.files.forEach((f, i) => {
-        const div = document.createElement('div'); div.className = `tab ${i===state.activeFileIndex?'selected':''}`;
-        div.innerHTML = `<div class="tab-icon" style="background:${f.type==='SERVER_JS'?'#2563eb':'#e37400'}"></div>${f.name}`;
-        div.onclick = () => { state.files[state.activeFileIndex].source = document.getElementById('editor-area').value; state.activeFileIndex=i; renderTabs(); loadEditor(); };
-        el.appendChild(div);
-      });
-    }
+            const [apiKey, setApiKey] = useState(localStorage.getItem("gas_key") || "");
+            const [view, setView] = useState(apiKey ? "dashboard" : "login");
+            const [loading, setLoading] = useState(false);
+            
+            const [projects, setProjects] = useState([]);
+            const [filter, setFilter] = useState("script");
+            
+            const [editor, setEditor] = useState({ id: null, name: "", files: [], activeIdx: 0, isDirty: false });
+            const [modal, setModal] = useState(null); // { type: 'create', data: {} }
+            const [toastMsg, setToastMsg] = useState(null);
 
-    function loadEditor() { document.getElementById('editor-area').value = state.files[state.activeFileIndex].source; state.isDirty = false; document.getElementById('save-btn').innerText = "Save"; }
-    function markDirty() { if(!state.isDirty) { state.isDirty=true; document.getElementById('save-btn').innerText="Save*"; } }
+            const toast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(null), 3000); }
 
-    function saveProject() {
-      state.files[state.activeFileIndex].source = document.getElementById('editor-area').value;
-      const btn = document.getElementById('save-btn'); btn.innerText="Saving..."; btn.disabled=true;
-      api('saveContent', { id: state.currentScriptId, files: state.files })
-        .then(() => { toast("Saved!"); state.isDirty=false; btn.innerText="Save"; btn.disabled=false; })
-        .catch(e => { alert(e.message); btn.innerText="Save*"; btn.disabled=false; });
-    }
+            // --- API WRAPPER ---
+            const api = async (action, payload = {}) => {
+                payload.action = action;
+                payload.password = apiKey;
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const json = await res.json();
+                if(json.status === 'error') throw new Error(json.message);
+                return json.data;
+            };
 
-    // --- COPY FALLBACK ---
-    function copyFileContent() { 
-        const text = document.getElementById('editor-area').value;
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed"; textArea.style.left = "0"; textArea.style.top = "0"; textArea.style.opacity = "0.01";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try { document.execCommand('copy'); toast("Copied!"); } 
-        catch (err) { alert("Copy failed."); }
-        document.body.removeChild(textArea);
-    }
+            // --- DATA ---
+            const loadProjects = async () => {
+                setLoading(true);
+                try {
+                    const list = await api("getProjects", { type: filter });
+                    setProjects(list);
+                } catch(e) { toast("Error: " + e.message); }
+                setLoading(false);
+            };
 
-    // --- PASTE FALLBACK ---
-    async function pasteOverwrite() { 
-        try { 
-            const text = await navigator.clipboard.readText(); 
-            if(text) { document.getElementById('editor-area').value = text; markDirty(); toast("Pasted!"); return; }
-        } catch (err) {}
-        document.getElementById('paste-input-area').value = "";
-        showModal('paste-fallback');
-        setTimeout(() => document.getElementById('paste-input-area').focus(), 300);
-    }
-    
-    function confirmManualPaste() {
-        const text = document.getElementById('paste-input-area').value;
-        if(text) { document.getElementById('editor-area').value = text; markDirty(); toast("Pasted!"); }
-        closeModal();
-    }
+            useEffect(() => { if(view === "dashboard") loadProjects(); }, [filter, view]);
 
-    async function pasteToInput(id) { 
-        try { 
-            const text = await navigator.clipboard.readText(); 
-            if(text) { document.getElementById(id).value = text; return; }
-        } catch(e) {}
-        const manualInput = prompt("Browser blocked paste. Paste ID here:");
-        if (manualInput) document.getElementById(id).value = manualInput;
-    }
+            // --- ACTIONS ---
+            const handleLogin = () => {
+                if(!apiKey) return;
+                localStorage.setItem("gas_key", apiKey);
+                setView("dashboard");
+            };
 
-    // --- DEPLOY ---
-    function confirmDeploy() {
-      const desc = document.getElementById('deploy-desc-input').value || "Update";
-      const access = document.getElementById('deploy-access-input').value;
-      closeModal(); showLoading("Deploying (This may take 10s)...");
-      api('deploy', { id: state.currentScriptId, desc: desc, access: access, isNew: state.deployMode === 'NEW' })
-        .then(res => {
-          hideLoading();
-          document.getElementById('deploy-result-ver').innerText = "v" + res.version + " Success";
-          const link = document.getElementById('deploy-result-link'); link.href = res.url; link.innerText = res.url;
-          showModal('deploy-result');
-        })
-        .catch(e => { hideLoading(); alert(e.message); });
-    }
+            const openProject = async (id, name, isLinked, linkId) => {
+                const targetId = isLinked ? linkId : id;
+                if(!targetId) { 
+                    // Need to link
+                    setModal({ type: 'link', data: { containerId: id } });
+                    return; 
+                }
+                setLoading(true);
+                try {
+                    const files = await api("getContent", { id: targetId });
+                    setEditor({ id: targetId, name: name, files: files, activeIdx: 0, isDirty: false });
+                    setView("editor");
+                } catch(e) { toast(e.message); }
+                setLoading(false);
+            };
 
-    // --- OTHER OPS ---
-    function doCreateProject() {
-      const n=document.getElementById('new-project-name').value;
-      if(n) { closeModal(); showLoading("Creating..."); api('createProject', { title: n }).then(() => { hideLoading(); setFilter('script', document.querySelector('.chip.active')); }).catch(e => { hideLoading(); alert(e.message); }); }
-    }
-    function performDelete(p) {
-      showLoading("Deleting..."); api('deleteProject', { id: p.id }).then(() => { hideLoading(); toast("Deleted"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => { hideLoading(); alert(e.message); });
-    }
-    function renameSelectedProject() {
-      const newName = prompt("Rename:", state.selectedItem.name);
-      if(newName) { closeModal(); showLoading("Renaming..."); api('renameProject', { id: state.selectedItem.id, newName: newName }).then(() => { hideLoading(); toast("Renamed"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => { hideLoading(); alert(e.message); }); }
-    }
-    function doLinkScript() {
-      const id = document.getElementById('link-script-id').value.trim();
-      if(id) { closeModal(); toast("Linking..."); api('linkScript', { containerId: state.currentContainerId, scriptId: id }).then(() => toast("Linked!")).catch(e => alert(e.message)); }
-    }
-    function confirmUnlink() {
-      closeModal(); showLoading("Unlinking..."); api('unlinkScript', { containerId: state.selectedItem.id }).then(() => { hideLoading(); toast("Unlinked"); setFilter('script', document.querySelector('.filter-bar .chip')); }).catch(e => alert(e.message));
-    }
-    
-    function renameCurrentFile() { const currentFile = state.files[state.activeFileIndex]; const newName = prompt("New filename:", currentFile.name); if (newName && newName !== currentFile.name) { currentFile.name = newName; renderTabs(); markDirty(); closeModal(); toast("Renamed File"); } }
-    function renameCurrentProject() { const newName = prompt("Rename Project:", document.getElementById('editor-title').innerText); if (newName) { closeModal(); showLoading("Renaming..."); api('renameProject', { id: state.currentScriptId, newName: newName }).then(() => { hideLoading(); toast("Renamed"); document.getElementById('editor-title').innerText = newName; }).catch(e => { hideLoading(); alert(e.message); }); } }
-    function doDeleteFile() { if(state.files.length>1){ state.files.splice(state.activeFileIndex,1); state.activeFileIndex=0; closeModal(); renderTabs(); loadEditor(); markDirty(); } else alert("Cannot delete last file"); }
-    function openRelink() { closeModal(); state.currentContainerId = state.selectedItem.id; showModal('link-script'); }
-    function confirmDeleteProject() { if(!confirm("Move '" + state.selectedItem.name + "' to Trash?")) return; closeModal(); performDelete(state.selectedItem); }
-    function openDeployMenu() { showModal('deploy-choice'); }
-    function initNewDeployment() { state.deployMode = 'NEW'; showModal('deploy-desc'); }
-    function initUpdateDeployment() { state.deployMode = 'UPDATE'; showModal('deploy-list'); document.getElementById('deploy-list-container').innerHTML = '<div style="padding:20px;">Loading...</div>'; api('deploy', { id: state.currentScriptId, desc: "", access: "", isNew: false, listOnly: true }).then(list => { const con = document.getElementById('deploy-list-container'); con.innerHTML = ''; if(list.length === 0) { con.innerHTML = '<div style="padding:20px;">No deployments.</div>'; return; } list.forEach(d => { const div = document.createElement('div'); div.className = 'list-option'; div.innerHTML = `<strong>v${d.version}</strong><span>${d.description}</span>`; div.onclick = () => { state.selectedDeployId = d.id; showModal('deploy-desc'); }; con.appendChild(div); }); }).catch(e => { document.getElementById('deploy-list-container').innerText=e.message; }); } // Adjusted for API list flow
-  </script>
+            const handleLaunch = async (p, e) => {
+                e.stopPropagation();
+                if(!confirm("Open Web App in new tab?")) return;
+                const targetId = p.linkedScriptId || p.id;
+                setLoading(true);
+                try {
+                    const url = await api("getAppUrl", { id: targetId });
+                    window.open(url, '_blank');
+                } catch(e) { toast("Launch Failed: " + e.message); }
+                setLoading(false);
+            };
+
+            const handleDelete = async (p, e) => {
+                e.stopPropagation();
+                if(!confirm(p.linkedScriptId ? "Unlink script?" : "Trash project?")) return;
+                setLoading(true);
+                try {
+                    if(p.linkedScriptId) await api("unlinkScript", { containerId: p.id });
+                    else await api("deleteProject", { id: p.id });
+                    loadProjects();
+                    toast("Done");
+                } catch(e) { toast(e.message); }
+                setLoading(false);
+            };
+
+            const handleDeployModal = (e) => {
+                e.stopPropagation();
+                setModal({ type: 'deploy' });
+            };
+            
+            const executeDeploy = async (isNew, access, desc) => {
+                setModal(null); setLoading(true);
+                try {
+                    const res = await api("deploy", { id: editor.id, isNew, access, desc });
+                    window.open(res.url, '_blank');
+                    toast("Deployed v" + res.version);
+                } catch(e) { toast("Deploy Error: " + e.message); }
+                setLoading(false);
+            };
+
+            const saveFile = async () => {
+                setLoading(true);
+                try {
+                    await api("saveContent", { id: editor.id, files: editor.files });
+                    setEditor(p => ({ ...p, isDirty: false }));
+                    toast("Saved");
+                } catch(e) { toast(e.message); }
+                setLoading(false);
+            };
+
+            // --- COMPONENTS ---
+            const FilterChip = ({ label, id }) => (
+                <button onClick={() => setFilter(id)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap border ${filter === id ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500'}`}>
+                    {label}
+                </button>
+            );
+
+            // --- RENDER ---
+            return (
+                <div className="max-w-2xl mx-auto h-[100dvh] flex flex-col relative text-slate-900 dark:text-gray-100">
+                    
+                    {/* Header */}
+                    {view !== "login" && (
+                        <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 p-3 flex items-center justify-between z-50">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                {view === "editor" && <button onClick={() => setView("dashboard")} className="p-1.5 bg-gray-100 dark:bg-slate-800 rounded-full"><Icons.Back /></button>}
+                                <h1 className="font-bold truncate text-sm">{view === "editor" ? editor.name : "GAS Mobile"}</h1>
+                            </div>
+                            <button onClick={toggleTheme} className="p-2 rounded-full text-lg">🌗</button>
+                        </div>
+                    )}
+
+                    {/* Views */}
+                    <div className="p-0 flex-1 relative overflow-hidden flex flex-col h-full">
+                        
+                        {/* LOADING */}
+                        {loading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 z-50 flex items-center justify-center"><div className="loader"></div></div>}
+
+                        {/* LOGIN */}
+                        {view === "login" && (
+                            <div className="flex flex-col items-center justify-center h-full p-6 space-y-4">
+                                <h1 className="text-2xl font-bold">Locked</h1>
+                                <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="API Secret" className="w-full max-w-xs bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded p-3 text-center" />
+                                <button onClick={handleLogin} className="w-full max-w-xs bg-blue-600 text-white font-bold py-3 rounded-xl">Unlock</button>
+                            </div>
+                        )}
+
+                        {/* DASHBOARD */}
+                        {view === "dashboard" && (
+                            <div className="flex flex-col h-full">
+                                <div className="flex items-center gap-2 p-3 overflow-x-auto border-b border-gray-100 dark:border-slate-800">
+                                    <button onClick={() => setModal({ type: 'create' })} className="px-3 py-1.5 rounded-full text-sm font-bold border-2 border-emerald-500 text-emerald-500 flex items-center gap-1 active:bg-emerald-50"><Icons.Plus /> New</button>
+                                    <FilterChip label="Scripts" id="script" />
+                                    <FilterChip label="Sheets" id="sheet" />
+                                    <FilterChip label="Docs" id="doc" />
+                                    <FilterChip label="Forms" id="form" />
+                                </div>
+                                
+                                <div className="flex-1 overflow-y-auto p-3 space-y-3 pb-20">
+                                    {projects.map(p => (
+                                        <div key={p.id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm flex flex-col">
+                                            <div onClick={() => openProject(p.id, p.name, !!p.linkedScriptId, p.linkedScriptId)} className="p-4 flex items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 cursor-pointer">
+                                                {p.mime.includes('sheet') ? <Icons.Sheet /> : p.mime.includes('doc') ? <Icons.Doc /> : p.mime.includes('form') ? <Icons.Form /> : <Icons.Script />}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold truncate">{p.name}</h3>
+                                                    <p className="text-xs text-gray-400">{p.updated}</p>
+                                                </div>
+                                            </div>
+                                            {/* Action Strip */}
+                                            <div className="flex border-t border-gray-100 dark:border-slate-700 divide-x divide-gray-100 dark:divide-slate-700">
+                                                <button onClick={(e) => { e.stopPropagation(); openProject(p.id, p.name, !!p.linkedScriptId, p.linkedScriptId).then(() => setModal({ type: 'deploy' })); }} className="flex-1 p-3 flex justify-center text-yellow-500 active:bg-gray-100"><Icons.Zap /></button>
+                                                <button onClick={(e) => handleLaunch(p, e)} className="flex-1 p-3 flex justify-center text-blue-500 active:bg-gray-100"><Icons.Globe /></button>
+                                                <button onClick={(e) => handleDelete(p, e)} className="flex-1 p-3 flex justify-center text-red-500 active:bg-gray-100"><Icons.Trash /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {projects.length === 0 && !loading && <div className="text-center text-gray-400 py-10">No projects</div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* EDITOR */}
+                        {view === "editor" && (
+                            <div className="flex flex-col h-full">
+                                <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900">
+                                    {editor.files.map((f, i) => (
+                                        <button key={i} onClick={() => setEditor({...editor, activeIdx: i})} className={`px-4 py-3 text-sm font-mono border-b-2 transition ${i === editor.activeIdx ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800' : 'border-transparent text-gray-500'}`}>
+                                            {f.name}
+                                        </button>
+                                    ))}
+                                    <button onClick={() => setModal({type:'addFile'})} className="px-3 text-gray-400 hover:text-blue-500">+</button>
+                                </div>
+                                
+                                <textarea 
+                                    className="flex-1 p-4 bg-white dark:bg-slate-900 text-sm font-mono outline-none resize-none" 
+                                    value={editor.files[editor.activeIdx]?.source || ''}
+                                    onChange={(e) => {
+                                        const newFiles = [...editor.files];
+                                        newFiles[editor.activeIdx].source = e.target.value;
+                                        setEditor({ ...editor, files: newFiles, isDirty: true });
+                                    }}
+                                    spellCheck="false"
+                                />
+
+                                <div className="p-2 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 flex gap-2 overflow-x-auto">
+                                    <button onClick={() => setModal({type:'addFile'})} className="px-4 py-2 bg-gray-100 dark:bg-slate-800 rounded-lg text-sm font-bold border border-emerald-500 text-emerald-600">+ File</button>
+                                    <button onClick={() => { navigator.clipboard.readText().then(t => { if(t) { const n=[...editor.files]; n[editor.activeIdx].source=t; setEditor({...editor, files:n, isDirty:true}); toast("Pasted"); } }).catch(() => setModal({type:'pasteManual'})); }} className="px-4 py-2 bg-[#795548] text-white rounded-lg text-sm font-bold">Overwrite</button>
+                                    <button onClick={saveFile} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold flex items-center gap-2"><Icons.Save /> Save</button>
+                                    <button onClick={() => setModal({type:'deploy'})} className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-bold">Deploy</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* MODALS */}
+                        {modal && (
+                            <div className="modal-bg" onClick={() => setModal(null)}>
+                                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl w-10/12 max-w-sm shadow-2xl space-y-4" onClick={e => e.stopPropagation()}>
+                                    
+                                    {modal.type === 'create' && <>
+                                        <h3 className="font-bold text-lg">New Project</h3>
+                                        <input autoFocus placeholder="Project Name" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="create-input" />
+                                        <div className="flex gap-2">
+                                            <button onClick={() => setModal(null)} className="flex-1 p-3 bg-gray-100 dark:bg-slate-700 rounded-lg font-bold">Cancel</button>
+                                            <button onClick={() => { 
+                                                const n = document.getElementById('create-input').value; 
+                                                if(n) { setModal(null); setLoading(true); api('createProject', {title:n}).then(() => { loadProjects(); toast("Created"); }).catch(e=>toast(e.message)).finally(()=>setLoading(false)); } 
+                                            }} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">Create</button>
+                                        </div>
+                                    </>}
+
+                                    {modal.type === 'link' && <>
+                                        <h3 className="font-bold text-lg">Link Script</h3>
+                                        <p className="text-xs text-gray-500">Paste the Script ID found in the URL of the bound script editor.</p>
+                                        <input autoFocus placeholder="Script ID" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="link-input" />
+                                        <button onClick={() => {
+                                            const id = document.getElementById('link-input').value;
+                                            if(id) { setModal(null); setLoading(true); api('linkScript', {containerId: modal.data.containerId, scriptId: id}).then(() => { loadProjects(); toast("Linked"); }).finally(()=>setLoading(false)); }
+                                        }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Link</button>
+                                    </>}
+
+                                    {modal.type === 'addFile' && <>
+                                        <h3 className="font-bold text-lg">Add File</h3>
+                                        <input autoFocus placeholder="Filename (no ext)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="file-input" />
+                                        <div className="flex gap-2">
+                                            <button onClick={() => {
+                                                const n = document.getElementById('file-input').value;
+                                                if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'SERVER_JS', source: ''}], activeIdx: prev.files.length})); setModal(null); }
+                                            }} className="flex-1 p-3 bg-blue-100 text-blue-700 rounded-lg font-bold">Script</button>
+                                            <button onClick={() => {
+                                                const n = document.getElementById('file-input').value;
+                                                if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'HTML', source: '<html></html>'}], activeIdx: prev.files.length})); setModal(null); }
+                                            }} className="flex-1 p-3 bg-orange-100 text-orange-700 rounded-lg font-bold">HTML</button>
+                                        </div>
+                                    </>}
+
+                                    {modal.type === 'deploy' && <>
+                                        <h3 className="font-bold text-lg">Deploy</h3>
+                                        <input placeholder="Description (e.g. v2)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="deploy-desc" />
+                                        <select id="deploy-access" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none">
+                                            <option value="ANYONE">Anyone (Anonymous)</option>
+                                            <option value="GOOGLE">Anyone with Google</option>
+                                            <option value="MYSELF">Only Me</option>
+                                        </select>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => executeDeploy(true, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">New</button>
+                                            <button onClick={() => executeDeploy(false, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-emerald-600 text-white rounded-lg font-bold">Update</button>
+                                        </div>
+                                    </>}
+
+                                    {modal.type === 'pasteManual' && <>
+                                        <h3 className="font-bold">Paste</h3>
+                                        <p className="text-xs">Browser blocked auto-paste. Paste manually below:</p>
+                                        <textarea id="manual-paste-area" className="w-full h-32 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-2"></textarea>
+                                        <button onClick={() => {
+                                            const t = document.getElementById('manual-paste-area').value;
+                                            if(t) { const n=[...editor.files]; n[editor.activeIdx].source=t; setEditor({...editor, files:n, isDirty:true}); toast("Pasted"); }
+                                            setModal(null);
+                                        }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Confirm</button>
+                                    </>}
+
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TOAST */}
+                        <div className={`toast ${toastMsg ? 'show' : ''}`}>{toastMsg}</div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
