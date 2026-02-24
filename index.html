@@ -120,15 +120,30 @@
                 setLoading(false);
             };
 
+            // --- UPDATED LAUNCH HANDLER (POPUP FIX) ---
             const handleLaunch = async (p, e) => {
                 e.stopPropagation();
                 if(!confirm("Open Web App in new tab?")) return;
+                
+                // 1. Open blank window IMMEDIATELY to bypass popup blocker
+                const win = window.open("about:blank", "_blank");
+                if (!win) {
+                    toast("Popup blocked! Allow popups for this site.");
+                    return;
+                }
+                win.document.write("<html><body style='background:#0f172a;color:white;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'>Fetching Web App URL...</body></html>");
+
                 const targetId = p.linkedScriptId || p.id;
                 setLoading(true);
                 try {
                     const url = await api("getAppUrl", { id: targetId });
-                    window.open(url, '_blank');
-                } catch(e) { toast("Launch Failed: " + e.message); }
+                    // 2. Redirect the blank window
+                    if(url) win.location.href = url;
+                    else throw new Error("No URL returned");
+                } catch(e) { 
+                    win.close(); // Close the blank tab if fail
+                    toast(e.message.includes("No deployments") ? "Project not deployed yet." : "Launch Failed: " + e.message); 
+                }
                 setLoading(false);
             };
 
@@ -143,23 +158,6 @@
                     toast("Done");
                 } catch(e) { toast(e.message); }
                 setLoading(false);
-            };
-
-            // --- FILE DELETION ---
-            const handleDeleteFile = () => {
-                const currentFile = editor.files[editor.activeIdx];
-                if (editor.files.length <= 1) {
-                    toast("Cannot delete the only file");
-                    return;
-                }
-                if (!confirm(`Delete file '${currentFile.name}'?`)) return;
-
-                const newFiles = editor.files.filter((_, i) => i !== editor.activeIdx);
-                // Adjust index: if deleting last item, step back, else stay
-                const newIdx = editor.activeIdx >= newFiles.length ? newFiles.length - 1 : editor.activeIdx;
-                
-                setEditor({ ...editor, files: newFiles, activeIdx: newIdx, isDirty: true });
-                toast("File removed. Press Save.");
             };
 
             const executeDeploy = async (isNew, access, desc) => {
@@ -217,15 +215,7 @@
                                 {view === "editor" && <button onClick={() => setView("dashboard")} className="p-1.5 bg-gray-100 dark:bg-slate-800 rounded-full"><Icons.Back /></button>}
                                 <h1 className="font-bold truncate text-sm">{view === "editor" ? editor.name : "GAS Mobile"}</h1>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {/* DELETE FILE BUTTON (Only in Editor) */}
-                                {view === "editor" && (
-                                    <button onClick={handleDeleteFile} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition">
-                                        <Icons.Trash />
-                                    </button>
-                                )}
-                                <button onClick={toggleTheme} className="p-2 rounded-full text-lg">🌗</button>
-                            </div>
+                            <button onClick={toggleTheme} className="p-2 rounded-full text-lg">🌗</button>
                         </div>
                     )}
 
@@ -270,6 +260,7 @@
                                                 </div>
                                             </div>
                                             <div className="flex border-t border-gray-100 dark:border-slate-700 divide-x divide-gray-100 dark:divide-slate-700">
+                                                {/* Consistent sizing with flex-1 w-0 */}
                                                 {(p.mime.includes('script') || p.linkedScriptId) && <>
                                                     <button onClick={(e) => { e.stopPropagation(); openProject(p).then(() => setModal({ type: 'deploy' })); }} className="flex-1 w-0 p-3 flex justify-center text-yellow-500 active:bg-gray-100"><Icons.Zap /></button>
                                                     <button onClick={(e) => handleLaunch(p, e)} className="flex-1 w-0 p-3 flex justify-center text-blue-500 active:bg-gray-100"><Icons.Globe /></button>
