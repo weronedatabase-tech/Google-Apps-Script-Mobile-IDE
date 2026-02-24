@@ -18,8 +18,19 @@
     </script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        .loader { border: 3px solid rgba(128,128,128,0.3); border-radius: 50%; border-top: 3px solid #3b82f6; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
+        
+        /* UPDATED LOADER CSS */
+        .loader { 
+            border: 5px solid rgba(255, 255, 255, 0.2); 
+            border-radius: 50%; 
+            border-top: 5px solid #3b82f6; 
+            width: 50px; 
+            height: 50px; 
+            animation: spin 1s linear infinite; 
+        }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         textarea, input { font-size: 14px !important; }
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; white-space: nowrap; }
         .toast.show { opacity: 1; }
@@ -71,7 +82,7 @@
             
             // Editor State
             const [editor, setEditor] = useState({ id: null, name: "", files: [], activeIdx: 0, isDirty: false });
-            const [deployDesc, setDeployDesc] = useState("Update"); // State for the bottom input field
+            const [deployDesc, setDeployDesc] = useState("Update"); 
             
             const [modal, setModal] = useState(null);
             const [toastMsg, setToastMsg] = useState(null);
@@ -114,7 +125,7 @@
                 try {
                     const files = await api("getContent", { id: targetId });
                     setEditor({ id: targetId, name: project.name, files: files, activeIdx: 0, isDirty: false });
-                    setDeployDesc("Update"); // Reset desc
+                    setDeployDesc("Update");
                     setView("editor");
                 } catch(e) { toast(e.message); }
                 setLoading(false);
@@ -207,8 +218,13 @@
                     {/* Views */}
                     <div className="p-0 flex-1 relative overflow-hidden flex flex-col h-full">
                         
-                        {/* LOADING */}
-                        {loading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 z-50 flex items-center justify-center"><div className="loader"></div></div>}
+                        {/* UPDATED LOADING OVERLAY */}
+                        {loading && (
+                            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center">
+                                <div className="loader mb-4"></div>
+                                <div className="text-white font-medium text-lg animate-pulse">Processing...</div>
+                            </div>
+                        )}
 
                         {/* LOGIN */}
                         {view === "login" && (
@@ -240,7 +256,6 @@
                                                 </div>
                                             </div>
                                             <div className="flex border-t border-gray-100 dark:border-slate-700 divide-x divide-gray-100 dark:divide-slate-700">
-                                                {/* Consistent sizing with flex-1 w-0 */}
                                                 {(p.mime.includes('script') || p.linkedScriptId) && <>
                                                     <button onClick={(e) => { e.stopPropagation(); openProject(p).then(() => setModal({ type: 'deploy' })); }} className="flex-1 w-0 p-3 flex justify-center text-yellow-500 active:bg-gray-100"><Icons.Zap /></button>
                                                     <button onClick={(e) => handleLaunch(p, e)} className="flex-1 w-0 p-3 flex justify-center text-blue-500 active:bg-gray-100"><Icons.Globe /></button>
@@ -278,7 +293,7 @@
                                     spellCheck="false"
                                 />
 
-                                {/* NEW BOTTOM TOOLBAR */}
+                                {/* NEW BOTTOM TOOLBAR (SWAPPED BUTTONS & EQUAL SIZING) */}
                                 <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 p-2 pb-safe-b flex items-center gap-2 z-50 shadow-lg">
                                     <button onClick={handlePaste} className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg active:scale-90 transition"><Icons.Paste /></button>
                                     <button onClick={handleCopy} className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg active:scale-90 transition"><Icons.Copy /></button>
@@ -291,6 +306,7 @@
                                         placeholder="Version Desc"
                                     />
                                     
+                                    {/* Swapped: Save first (Green), then Deploy (Zap) */}
                                     <button onClick={saveFile} className="p-2 bg-green-600 text-white rounded-lg shadow-md active:scale-90 transition"><Icons.Save /></button>
                                     <button onClick={() => setModal({type:'deploy', desc: deployDesc})} className="p-2 text-yellow-600 dark:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg active:scale-90 transition"><Icons.Zap /></button>
                                 </div>
@@ -310,18 +326,17 @@
                                     
                                     {modal.type === 'deploy' && <>
                                         <h3 className="font-bold text-lg">Deploy</h3>
-                                        {/* Desc Input pulled from bottom bar state, shown here just for confirmation/editing if needed, or removed if the bottom bar is sufficient. Let's keep it consistent. */}
                                         <input 
-                                            placeholder="Description" 
+                                            placeholder="Description (e.g. v2)" 
                                             className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" 
-                                            value={deployDesc}
-                                            onChange={(e) => setDeployDesc(e.target.value)}
+                                            value={modal.desc || deployDesc}
+                                            onChange={(e) => { setDeployDesc(e.target.value); setModal(prev=>({...prev, desc: e.target.value})); }}
                                             id="deploy-desc" 
                                         />
                                         <select id="deploy-access" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none"><option value="ANYONE">Anyone (Anonymous)</option><option value="GOOGLE">Anyone with Google</option><option value="MYSELF">Only Me</option></select>
                                         <div className="flex gap-2">
-                                            <button onClick={() => executeDeploy(true, document.getElementById('deploy-access').value, deployDesc)} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">New</button>
-                                            <button onClick={() => executeDeploy(false, document.getElementById('deploy-access').value, deployDesc)} className="flex-1 p-3 bg-emerald-600 text-white rounded-lg font-bold">Update</button>
+                                            <button onClick={() => executeDeploy(true, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">New</button>
+                                            <button onClick={() => executeDeploy(false, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-emerald-600 text-white rounded-lg font-bold">Update</button>
                                         </div>
                                     </>}
 
