@@ -37,7 +37,6 @@
         import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
 
         // --- CONFIG ---
-        // PASTE YOUR WEB APP URL HERE:
         const API_URL = "https://script.google.com/macros/s/AKfycbx6Iv9HjZl-b_ZXpRhSG4Yjg1Hv7nGWo7V6UEtThVL-TIkR2BC2JB3q04tHHPAvFpNN/exec";
 
         // --- ICONS ---
@@ -46,15 +45,15 @@
             Sheet: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-emerald-500"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
             Doc: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-sky-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
             Form: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-purple-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
-            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
             Zap: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
             Globe: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-            Back: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
-            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>,
-            Paste: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
-            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
-            Save: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Back: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>,
+            Paste: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
+            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+            Save: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         };
 
         function App() {
@@ -75,7 +74,6 @@
 
             const toast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(null), 3000); }
 
-            // --- API WRAPPER ---
             const api = async (action, payload = {}) => {
                 payload.action = action;
                 payload.password = apiKey;
@@ -85,7 +83,6 @@
                 return json.data;
             };
 
-            // --- DATA ---
             const loadProjects = async () => {
                 setLoading(true);
                 try {
@@ -97,23 +94,24 @@
 
             useEffect(() => { if(view === "dashboard") loadProjects(); }, [filter, view]);
 
-            // --- ACTIONS ---
             const handleLogin = () => {
                 if(!apiKey) return;
                 localStorage.setItem("gas_key", apiKey);
                 setView("dashboard");
             };
 
-            const openProject = async (id, name, isLinked, linkId) => {
-                const targetId = isLinked ? linkId : id;
-                if(!targetId) { 
-                    setModal({ type: 'link', data: { containerId: id } });
-                    return; 
+            const openProject = async (project) => {
+                // LOGIC FIX: If it's NOT a script and NOT linked, prompt to link
+                if (!project.mime.includes('script') && !project.linkedScriptId) {
+                    setModal({ type: 'link', data: { containerId: project.id } });
+                    return;
                 }
+
+                const targetId = project.linkedScriptId || project.id;
                 setLoading(true);
                 try {
                     const files = await api("getContent", { id: targetId });
-                    setEditor({ id: targetId, name: name, files: files, activeIdx: 0, isDirty: false });
+                    setEditor({ id: targetId, name: project.name, files: files, activeIdx: 0, isDirty: false });
                     setView("editor");
                 } catch(e) { toast(e.message); }
                 setLoading(false);
@@ -121,7 +119,7 @@
 
             const handleLaunch = async (p, e) => {
                 e.stopPropagation();
-                if(!confirm("Open Web App in new tab?")) return;
+                if(!confirm("Open Web App?")) return;
                 const targetId = p.linkedScriptId || p.id;
                 setLoading(true);
                 try {
@@ -164,7 +162,6 @@
                 setLoading(false);
             };
             
-            // Clipboard Actions
             const handleCopy = () => {
                 const text = editor.files[editor.activeIdx]?.source || "";
                 navigator.clipboard.writeText(text).then(() => toast("Copied")).catch(() => toast("Copy Failed"));
@@ -179,23 +176,18 @@
                         setEditor({ ...editor, files: newFiles, isDirty: true });
                         toast("Pasted");
                     }
-                } catch (err) { 
-                    setModal({ type: 'pasteManual' });
-                }
+                } catch (err) { setModal({ type: 'pasteManual' }); }
             };
 
-            // --- COMPONENTS ---
             const FilterChip = ({ label, id }) => (
                 <button onClick={() => setFilter(id)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap border ${filter === id ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500'}`}>
                     {label}
                 </button>
             );
 
-            // --- RENDER ---
             return (
                 <div className="max-w-2xl mx-auto h-[100dvh] flex flex-col relative text-slate-900 dark:text-gray-100">
                     
-                    {/* Header */}
                     {view !== "login" && (
                         <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 p-3 flex items-center justify-between z-50">
                             <div className="flex items-center gap-2 overflow-hidden">
@@ -206,13 +198,9 @@
                         </div>
                     )}
 
-                    {/* Views */}
                     <div className="p-0 flex-1 relative overflow-hidden flex flex-col h-full">
-                        
-                        {/* LOADING */}
                         {loading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 z-50 flex items-center justify-center"><div className="loader"></div></div>}
 
-                        {/* LOGIN */}
                         {view === "login" && (
                             <div className="flex flex-col items-center justify-center h-full p-6 space-y-4">
                                 <h1 className="text-2xl font-bold">Locked</h1>
@@ -221,7 +209,6 @@
                             </div>
                         )}
 
-                        {/* DASHBOARD */}
                         {view === "dashboard" && (
                             <div className="flex flex-col h-full">
                                 <div className="flex items-center gap-2 p-3 overflow-x-auto border-b border-gray-100 dark:border-slate-800">
@@ -231,21 +218,22 @@
                                     <FilterChip label="Docs" id="doc" />
                                     <FilterChip label="Forms" id="form" />
                                 </div>
-                                
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3 pb-20">
                                     {projects.map(p => (
                                         <div key={p.id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm flex flex-col">
-                                            <div onClick={() => openProject(p.id, p.name, !!p.linkedScriptId, p.linkedScriptId)} className="p-4 flex items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 cursor-pointer">
+                                            <div onClick={() => openProject(p)} className="p-4 flex items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 cursor-pointer">
                                                 {p.mime.includes('sheet') ? <Icons.Sheet /> : p.mime.includes('doc') ? <Icons.Doc /> : p.mime.includes('form') ? <Icons.Form /> : <Icons.Script />}
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="font-semibold truncate">{p.name}</h3>
                                                     <p className="text-xs text-gray-400">{p.updated}</p>
                                                 </div>
                                             </div>
-                                            {/* Action Strip */}
                                             <div className="flex border-t border-gray-100 dark:border-slate-700 divide-x divide-gray-100 dark:divide-slate-700">
-                                                <button onClick={(e) => { e.stopPropagation(); openProject(p.id, p.name, !!p.linkedScriptId, p.linkedScriptId).then(() => setModal({ type: 'deploy' })); }} className="flex-1 p-3 flex justify-center text-yellow-500 active:bg-gray-100"><Icons.Zap /></button>
-                                                <button onClick={(e) => handleLaunch(p, e)} className="flex-1 p-3 flex justify-center text-blue-500 active:bg-gray-100"><Icons.Globe /></button>
+                                                {/* Only show Zap/Globe for scripts (linked or standalone) */}
+                                                {(p.mime.includes('script') || p.linkedScriptId) && <>
+                                                    <button onClick={(e) => { e.stopPropagation(); openProject(p).then(() => setModal({ type: 'deploy' })); }} className="flex-1 p-3 flex justify-center text-yellow-500 active:bg-gray-100"><Icons.Zap /></button>
+                                                    <button onClick={(e) => handleLaunch(p, e)} className="flex-1 p-3 flex justify-center text-blue-500 active:bg-gray-100"><Icons.Globe /></button>
+                                                </>}
                                                 <button onClick={(e) => handleDelete(p, e)} className="flex-1 p-3 flex justify-center text-red-500 active:bg-gray-100"><Icons.Trash /></button>
                                             </div>
                                         </div>
@@ -255,33 +243,16 @@
                             </div>
                         )}
 
-                        {/* EDITOR */}
                         {view === "editor" && (
                             <div className="flex flex-col h-full relative">
                                 <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900">
                                     {editor.files.map((f, i) => (
-                                        <button key={i} onClick={() => setEditor({...editor, activeIdx: i})} className={`px-4 py-3 text-sm font-mono border-b-2 transition ${i === editor.activeIdx ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800' : 'border-transparent text-gray-500'}`}>
-                                            {f.name}
-                                        </button>
+                                        <button key={i} onClick={() => setEditor({...editor, activeIdx: i})} className={`px-4 py-3 text-sm font-mono border-b-2 transition ${i === editor.activeIdx ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800' : 'border-transparent text-gray-500'}`}>{f.name}</button>
                                     ))}
-                                    {/* Prominent Add File Button */}
-                                    <button onClick={() => setModal({type:'addFile'})} className="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 border-b-2 border-transparent flex items-center gap-1">
-                                        <Icons.Plus /> File
-                                    </button>
+                                    <button onClick={() => setModal({type:'addFile'})} className="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 border-b-2 border-transparent flex items-center gap-1"><Icons.Plus /> File</button>
                                 </div>
+                                <textarea className="flex-1 p-4 bg-white dark:bg-slate-900 text-sm font-mono outline-none resize-none pb-24" value={editor.files[editor.activeIdx]?.source || ''} onChange={(e) => { const newFiles = [...editor.files]; newFiles[editor.activeIdx].source = e.target.value; setEditor({ ...editor, files: newFiles, isDirty: true }); }} spellCheck="false" />
                                 
-                                <textarea 
-                                    className="flex-1 p-4 bg-white dark:bg-slate-900 text-sm font-mono outline-none resize-none pb-24" 
-                                    value={editor.files[editor.activeIdx]?.source || ''}
-                                    onChange={(e) => {
-                                        const newFiles = [...editor.files];
-                                        newFiles[editor.activeIdx].source = e.target.value;
-                                        setEditor({ ...editor, files: newFiles, isDirty: true });
-                                    }}
-                                    spellCheck="false"
-                                />
-
-                                {/* NEW BOTTOM TOOLBAR (Icon Style) */}
                                 <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 p-2 pb-safe-b flex items-center justify-between z-50 shadow-lg">
                                     <div className="flex gap-4 ml-2">
                                         <button onClick={handlePaste} className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg active:scale-90 transition"><Icons.Paste /></button>
@@ -295,78 +266,17 @@
                             </div>
                         )}
 
-                        {/* MODALS */}
                         {modal && (
                             <div className="modal-bg" onClick={() => setModal(null)}>
                                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl w-10/12 max-w-sm shadow-2xl space-y-4" onClick={e => e.stopPropagation()}>
-                                    
-                                    {modal.type === 'create' && <>
-                                        <h3 className="font-bold text-lg">New Project</h3>
-                                        <input autoFocus placeholder="Project Name" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="create-input" />
-                                        <div className="flex gap-2">
-                                            <button onClick={() => setModal(null)} className="flex-1 p-3 bg-gray-100 dark:bg-slate-700 rounded-lg font-bold">Cancel</button>
-                                            <button onClick={() => { 
-                                                const n = document.getElementById('create-input').value; 
-                                                if(n) { setModal(null); setLoading(true); api('createProject', {title:n}).then(() => { loadProjects(); toast("Created"); }).catch(e=>toast(e.message)).finally(()=>setLoading(false)); } 
-                                            }} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">Create</button>
-                                        </div>
-                                    </>}
-
-                                    {modal.type === 'link' && <>
-                                        <h3 className="font-bold text-lg">Link Script</h3>
-                                        <p className="text-xs text-gray-500">Paste the Script ID found in the URL of the bound script editor.</p>
-                                        <input autoFocus placeholder="Script ID" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="link-input" />
-                                        <button onClick={() => {
-                                            const id = document.getElementById('link-input').value;
-                                            if(id) { setModal(null); setLoading(true); api('linkScript', {containerId: modal.data.containerId, scriptId: id}).then(() => { loadProjects(); toast("Linked"); }).finally(()=>setLoading(false)); }
-                                        }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Link</button>
-                                    </>}
-
-                                    {modal.type === 'addFile' && <>
-                                        <h3 className="font-bold text-lg">Add File</h3>
-                                        <input autoFocus placeholder="Filename (no ext)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="file-input" />
-                                        <div className="flex gap-2">
-                                            <button onClick={() => {
-                                                const n = document.getElementById('file-input').value;
-                                                if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'SERVER_JS', source: ''}], activeIdx: prev.files.length})); setModal(null); }
-                                            }} className="flex-1 p-3 bg-blue-100 text-blue-700 rounded-lg font-bold">Script</button>
-                                            <button onClick={() => {
-                                                const n = document.getElementById('file-input').value;
-                                                if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'HTML', source: '<html></html>'}], activeIdx: prev.files.length})); setModal(null); }
-                                            }} className="flex-1 p-3 bg-orange-100 text-orange-700 rounded-lg font-bold">HTML</button>
-                                        </div>
-                                    </>}
-
-                                    {modal.type === 'deploy' && <>
-                                        <h3 className="font-bold text-lg">Deploy</h3>
-                                        <input placeholder="Description (e.g. v2)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="deploy-desc" />
-                                        <select id="deploy-access" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none">
-                                            <option value="ANYONE">Anyone (Anonymous)</option>
-                                            <option value="GOOGLE">Anyone with Google</option>
-                                            <option value="MYSELF">Only Me</option>
-                                        </select>
-                                        <div className="flex gap-2">
-                                            <button onClick={() => executeDeploy(true, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">New</button>
-                                            <button onClick={() => executeDeploy(false, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-emerald-600 text-white rounded-lg font-bold">Update</button>
-                                        </div>
-                                    </>}
-
-                                    {modal.type === 'pasteManual' && <>
-                                        <h3 className="font-bold">Paste</h3>
-                                        <p className="text-xs">Browser blocked auto-paste. Paste manually below:</p>
-                                        <textarea id="manual-paste-area" className="w-full h-32 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-2"></textarea>
-                                        <button onClick={() => {
-                                            const t = document.getElementById('manual-paste-area').value;
-                                            if(t) { const n=[...editor.files]; n[editor.activeIdx].source=t; setEditor({...editor, files:n, isDirty:true}); toast("Pasted"); }
-                                            setModal(null);
-                                        }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Confirm</button>
-                                    </>}
-
+                                    {modal.type === 'create' && <><h3 className="font-bold text-lg">New Project</h3><input autoFocus placeholder="Project Name" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="create-input" /><div className="flex gap-2"><button onClick={() => setModal(null)} className="flex-1 p-3 bg-gray-100 dark:bg-slate-700 rounded-lg font-bold">Cancel</button><button onClick={() => { const n = document.getElementById('create-input').value; if(n) { setModal(null); setLoading(true); api('createProject', {title:n}).then(() => { loadProjects(); toast("Created"); }).catch(e=>toast(e.message)).finally(()=>setLoading(false)); } }} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">Create</button></div></>}
+                                    {modal.type === 'link' && <><h3 className="font-bold text-lg">Link Script</h3><p className="text-xs text-gray-500">Paste the Script ID found in the URL.</p><input autoFocus placeholder="Script ID" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="link-input" /><button onClick={() => { const id = document.getElementById('link-input').value; if(id) { setModal(null); setLoading(true); api('linkScript', {containerId: modal.data.containerId, scriptId: id}).then(() => { loadProjects(); toast("Linked"); }).finally(()=>setLoading(false)); } }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Link</button></>}
+                                    {modal.type === 'addFile' && <><h3 className="font-bold text-lg">Add File</h3><input autoFocus placeholder="Filename (no ext)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="file-input" /><div className="flex gap-2"><button onClick={() => { const n = document.getElementById('file-input').value; if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'SERVER_JS', source: ''}], activeIdx: prev.files.length})); setModal(null); } }} className="flex-1 p-3 bg-blue-100 text-blue-700 rounded-lg font-bold">Script</button><button onClick={() => { const n = document.getElementById('file-input').value; if(n) { setEditor(prev => ({...prev, files: [...prev.files, {name: n, type: 'HTML', source: '<html></html>'}], activeIdx: prev.files.length})); setModal(null); } }} className="flex-1 p-3 bg-orange-100 text-orange-700 rounded-lg font-bold">HTML</button></div></>}
+                                    {modal.type === 'deploy' && <><h3 className="font-bold text-lg">Deploy</h3><input placeholder="Description (e.g. v2)" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none" id="deploy-desc" /><select id="deploy-access" className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-3 outline-none"><option value="ANYONE">Anyone (Anonymous)</option><option value="GOOGLE">Anyone with Google</option><option value="MYSELF">Only Me</option></select><div className="flex gap-2"><button onClick={() => executeDeploy(true, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-blue-600 text-white rounded-lg font-bold">New</button><button onClick={() => executeDeploy(false, document.getElementById('deploy-access').value, document.getElementById('deploy-desc').value)} className="flex-1 p-3 bg-emerald-600 text-white rounded-lg font-bold">Update</button></div></>}
+                                    {modal.type === 'pasteManual' && <><h3 className="font-bold">Paste</h3><p className="text-xs">Browser blocked auto-paste. Paste manually below:</p><textarea id="manual-paste-area" className="w-full h-32 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-2"></textarea><button onClick={() => { const t = document.getElementById('manual-paste-area').value; if(t) { const n=[...editor.files]; n[editor.activeIdx].source=t; setEditor({...editor, files:n, isDirty:true}); toast("Pasted"); } setModal(null); }} className="w-full p-3 bg-blue-600 text-white rounded-lg font-bold">Confirm</button></>}
                                 </div>
                             </div>
                         )}
-
-                        {/* TOAST */}
                         <div className={`toast ${toastMsg ? 'show' : ''}`}>{toastMsg}</div>
                     </div>
                 </div>
